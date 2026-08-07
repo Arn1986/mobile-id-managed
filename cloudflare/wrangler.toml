@@ -1,0 +1,9 @@
+name = "mobile-id-api-gateway"
+main = "src/index.ts"
+compatibility_date = "2026-08-07"
+routes = [
+  { pattern = "mobileid.nedapdemo.xyz", custom_domain = true }
+]
+
+[vars]
+SUPABASE_FUNCTION_BASE = "https://gcaqyryxzcphnovgqxhs.supabase.co/functions/v1/api"

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Mobile ID Managed Admin</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Mobile ID Managed</div>
+      <h1>Administration</h1>
+    </div>
+    <div id="sessionBar" class="session-bar hidden">
+      <span id="sessionUser"></span>
+      <button id="logoutButton" class="secondary">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="loginPanel" class="panel narrow">
+      <h2>Power-user sign in</h2>
+      <p>Use the Supabase account that was promoted to <strong>power_user</strong> or <strong>admin</strong>.</p>
+      <form id="loginForm" class="stack">
+        <label>Email<input id="loginEmail" type="email" autocomplete="username" required /></label>
+        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <div id="loginMessage" class="message"></div>
+    </section>
+
+    <section id="appPanel" class="hidden">
+      <div class="tabs">
+        <button data-tab="users" class="tab active">Users</button>
+        <button data-tab="settings" class="tab">Site settings</button>
+        <button data-tab="audit" class="tab">Audit</button>
+      </div>
+
+      <section id="tab-users" class="tab-page">
+        <div class="grid two">
+          <div class="panel">
+            <div class="row space-between wrap gap">
+              <div>
+                <h2>Managed users</h2>
+                <p>Search, create, update, activate or deactivate Mobile ID users.</p>
+              </div>
+              <div class="row gap">
+                <input id="userSearch" type="search" placeholder="Search users" />
+                <button id="refreshUsers" class="secondary">Refresh</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Identifier</th><th>External ID</th><th>Status</th><th></th></tr></thead>
+                <tbody id="userRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2 id="userFormTitle">Create user</h2>
+            <form id="userForm" class="stack">
+              <input id="editingUserId" type="hidden" />
+              <label>First name<input id="firstName" required /></label>
+              <label>Last name<input id="lastName" required /></label>
+              <label>Email<input id="email" type="email" required /></label>
+              <label>Identifier number<input id="identifierNumber" spellcheck="false" placeholder="081122334455667788" required /></label>
+              <label>AEOS external ID<input id="externalId" placeholder="AEOS-PERSON-123456" /></label>
+              <label class="check"><input id="active" type="checkbox" checked /> Active</label>
+              <label id="inviteRow" class="check"><input id="sendInvite" type="checkbox" /> Send Supabase invitation email</label>
+              <label id="overwriteRow" class="check"><input id="overwrite" type="checkbox" /> If email/external ID exists, update that same user</label>
+              <div class="row gap">
+                <button type="submit" id="saveUserButton">Create user</button>
+                <button type="button" id="cancelEdit" class="secondary hidden">Cancel edit</button>
+              </div>
+            </form>
+            <div id="userMessage" class="message"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-settings" class="tab-page hidden">
+        <div class="grid two">
+          <div class="panel">
+            <h2>Site configuration</h2>
+            <p>The MKEY is deliberately not shown or editable here. It stays in the server-side secret store.</p>
+            <form id="siteForm" class="stack">
+              <label>BLE reader name<input id="bleReaderName" required /></label>
+              <div class="grid two compact">
+                <label>Badge color start<input id="badgeColorStart" type="color" /></label>
+                <label>Badge color end<input id="badgeColorEnd" type="color" /></label>
+              </div>
+              <label>Credential cache TTL (hours)<input id="credentialTtlHours" type="number" min="1" max="720" required /></label>
+              <label>Badge logo (transparent PNG, max 2 MB)<input id="logoFile" type="file" accept="image/png,.png" /></label>
+              <div class="row gap">
+                <button type="submit">Save site configuration</button>
+                <button id="removeLogo" type="button" class="secondary">Remove logo</button>
+              </div>
+            </form>
+            <div id="siteMessage" class="message"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Badge preview</h2>
+            <div id="badgePreview" class="badge-preview">
+              <img id="badgeLogo" class="badge-logo hidden" alt="Badge logo" />
+              <div class="badge-name">Managed Mobile Badge</div>
+              <div class="badge-id">ID: 081122334455667788</div>
+            </div>
+            <div class="muted" id="siteMeta"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-audit" class="tab-page hidden">
+        <div class="panel">
+          <div class="row space-between">
+            <div><h2>Recent audit events</h2><p>No credential keys or passwords are logged.</p></div>
+            <button id="refreshAudit" class="secondary">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Details</th></tr></thead>
+              <tbody id="auditRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

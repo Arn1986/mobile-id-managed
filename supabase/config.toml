@@ -1,0 +1,10 @@
+project_id = "mobile-id-managed"
+
+[functions.api]
+verify_jwt = false
+
+[functions.admin-api]
+verify_jwt = false
+
+[functions.mobile-credential]
+verify_jwt = true

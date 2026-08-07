@@ -1,0 +1,23 @@
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# Node / tooling
+node_modules/
+dist/
+.DS_Store
+.vscode/
+.idea/
+
+# Cloudflare local state
+.wrangler/
+.dev.vars

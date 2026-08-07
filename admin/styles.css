@@ -1,0 +1,77 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #19202a;
+  background: #f3f5f8;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 24px max(24px, calc((100vw - 1450px) / 2)); background: #fff; border-bottom: 1px solid #dde2e8;
+}
+h1, h2 { margin: 0 0 8px; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.15rem; }
+p { margin: 0 0 18px; color: #5a6472; }
+.eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: #647184; font-weight: 700; }
+main { max-width: 1450px; margin: 0 auto; padding: 28px 24px 60px; }
+.panel { background: #fff; border: 1px solid #dde2e8; border-radius: 16px; padding: 22px; box-shadow: 0 5px 24px rgba(28, 37, 49, .05); }
+.narrow { max-width: 470px; margin: 8vh auto 0; }
+.hidden { display: none !important; }
+.stack { display: grid; gap: 14px; }
+label { display: grid; gap: 7px; font-size: .88rem; font-weight: 650; color: #374151; }
+label.check { display: flex; align-items: center; gap: 9px; font-weight: 500; }
+input { width: 100%; padding: 10px 11px; border: 1px solid #cbd3dd; border-radius: 9px; background: #fff; color: #17202b; }
+input[type=color] { min-height: 43px; padding: 4px; }
+input:focus { outline: 2px solid #7867dd55; border-color: #7564db; }
+button { border: 0; border-radius: 9px; padding: 10px 14px; background: #4d3fb3; color: #fff; font-weight: 700; }
+button:hover { filter: brightness(.96); }
+button.secondary { background: #edf0f4; color: #283241; }
+.row { display: flex; align-items: center; }
+.gap { gap: 10px; }
+.wrap { flex-wrap: wrap; }
+.space-between { justify-content: space-between; }
+.grid { display: grid; gap: 20px; }
+.grid.two { grid-template-columns: minmax(0, 1.6fr) minmax(330px, .8fr); }
+.grid.two.compact { grid-template-columns: 1fr 1fr; gap: 12px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.tab { background: #e5e9ef; color: #354052; }
+.tab.active { background: #4d3fb3; color: #fff; }
+.table-wrap { width: 100%; overflow: auto; margin-top: 18px; }
+table { border-collapse: collapse; width: 100%; min-width: 760px; }
+th, td { padding: 11px 10px; border-bottom: 1px solid #e7ebf0; text-align: left; font-size: .86rem; vertical-align: top; }
+th { color: #687383; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.status { display: inline-flex; border-radius: 999px; padding: 4px 8px; font-size: .75rem; font-weight: 700; }
+.status.active { background: #e3f6e9; color: #176235; }
+.status.inactive { background: #fde8e8; color: #8a2525; }
+.message { min-height: 20px; margin-top: 12px; font-size: .87rem; }
+.message.error { color: #a32323; }
+.message.success { color: #176235; }
+.muted { color: #6a7482; font-size: .82rem; margin-top: 14px; }
+.session-bar { display: flex; align-items: center; gap: 12px; }
+.badge-preview {
+  aspect-ratio: 1.586 / 1; border-radius: 22px; padding: 26px; color: #fff;
+  background: linear-gradient(135deg, #4935A3, #7A5BE7); display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 18px 45px rgba(42, 32, 100, .2); overflow: hidden;
+}
+.badge-logo { display: block; max-width: 42%; max-height: 35%; object-fit: contain; align-self: flex-start; }
+.badge-name { font-weight: 800; font-size: 1.15rem; margin-top: auto; }
+.badge-id { margin-top: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; opacity: .9; font-size: .82rem; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+@media (max-width: 930px) {
+  .grid.two { grid-template-columns: 1fr; }
+  .topbar { padding: 20px; }
+  main { padding: 20px; }
+}
+@media (prefers-color-scheme: dark) {
+  :root { color: #e8ecf2; background: #12161d; }
+  .topbar, .panel { background: #1a2029; border-color: #333b47; }
+  p, .muted { color: #a4adba; }
+  input { background: #11161d; color: #ecf0f5; border-color: #414b59; }
+  label { color: #d6dce5; }
+  th, td { border-color: #343d48; }
+  .tab, button.secondary { background: #303845; color: #e4e9ef; }
+}
