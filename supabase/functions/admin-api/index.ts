@@ -6,6 +6,7 @@ import { createManagedUser, publicUser, updateManagedUser } from '../_shared/use
 function corsHeaders(req: Request) {
   const origin = req.headers.get('origin') ?? ''
   const defaults = [
+	'https://mobileid-admin.nedapdemo.xyz',
     'https://admin.mobileid.nedapdemo.xyz',
     'https://arn1986.github.io',
     'http://localhost:5173',
