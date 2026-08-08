@@ -67,7 +67,7 @@ For compatibility with the original AEOS idea, lowercase names such as `firstnam
 - Raw ID128: `10` + 32 hex digits
 - Wiegand ID: `57` + 28 hex digits
 
-`sendInvite` is optional and defaults to `false`. When `true`, the backend asks Supabase Auth to send an invitation email. Keep it `false` until the user activation/redirect flow is configured.
+`sendInvite` is optional and defaults to `true`. Normal AEOS provisioning therefore sends an activation email automatically. The invitation redirects the user to `https://mobileid-admin.nedapdemo.xyz/activate.html`, where the user chooses the initial password. Set `sendInvite` to `false` only for controlled migration/testing scenarios because such an account has no usable password until an administrator handles activation separately.
 
 `overwrite` is optional. When `true`, an existing user with the same `externalId` or email is updated instead of creating a second record. It does not silently steal an identifier assigned to another user.
 

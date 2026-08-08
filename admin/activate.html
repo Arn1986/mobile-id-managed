@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Activate Mobile ID account</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Mobile ID Managed</div>
+      <h1>Account activation</h1>
+    </div>
+  </header>
+  <main>
+    <section class="panel narrow">
+      <h2>Create your password</h2>
+      <p id="activationIntro">Checking your invitation...</p>
+      <form id="activationForm" class="stack hidden">
+        <label>New password<input id="newPassword" type="password" autocomplete="new-password" minlength="12" required /></label>
+        <label>Confirm password<input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required /></label>
+        <button type="submit">Activate account</button>
+      </form>
+      <div id="activationMessage" class="message"></div>
+      <p id="loginLink" class="hidden"><a href="./">Return to administration sign-in</a></p>
+    </section>
+  </main>
+  <script type="module" src="./activate.js"></script>
+</body>
+</html>

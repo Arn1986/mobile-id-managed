@@ -63,7 +63,8 @@ export function normalizeUserPayload(input: unknown, partial = false) {
   if (!partial || identifier !== undefined) result.identifierNumber = normalizeIdentifier(identifier)
   if (externalId !== undefined) result.externalId = text(externalId, 'externalId', false)
   if (active !== undefined) result.active = Boolean(active)
-  if (sendInvite !== undefined) result.sendInvite = Boolean(sendInvite)
+  if (!partial) result.sendInvite = sendInvite === undefined ? true : Boolean(sendInvite)
+  else if (sendInvite !== undefined) result.sendInvite = Boolean(sendInvite)
   if (overwrite !== undefined) result.overwrite = Boolean(overwrite)
 
   return result
@@ -104,6 +105,7 @@ export async function createManagedUser(
   const identifierNumber = payload.identifierNumber as string
   const externalId = (payload.externalId as string | null | undefined) ?? null
   const overwrite = Boolean(payload.overwrite)
+  const sendInvite = payload.sendInvite !== false
 
   if (overwrite) {
     let existing = null
@@ -151,8 +153,8 @@ export async function createManagedUser(
       external_id: externalId,
     }
 
-    if (payload.sendInvite) {
-      const redirectTo = Deno.env.get('USER_INVITE_REDIRECT_URL')?.trim() || undefined
+    if (sendInvite) {
+      const redirectTo = Deno.env.get('USER_INVITE_REDIRECT_URL')?.trim() || 'https://mobileid-admin.nedapdemo.xyz/activate.html'
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
         data: metadata,
         ...(redirectTo ? { redirectTo } : {}),
@@ -195,7 +197,7 @@ export async function createManagedUser(
       api_client_id: apiClientId ?? null,
       event_type: 'user_created',
       actor,
-      metadata: { externalId, inviteRequested: Boolean(payload.sendInvite) },
+      metadata: { externalId, inviteRequested: sendInvite },
     })
 
     return profile
@@ -210,6 +212,14 @@ export async function createManagedUser(
     const message = error instanceof Error ? error.message : String(error)
     if (message.toLowerCase().includes('already') || message.toLowerCase().includes('duplicate')) {
       throw new HttpError(409, 'user_conflict', 'A user with this email or identifier already exists')
+    }
+    if (sendInvite) {
+      console.error('createManagedUser invitation failed', error)
+      throw new HttpError(
+        502,
+        'activation_email_failed',
+        'The user was not created because the activation email could not be sent. Check Supabase Auth email/SMTP configuration and rate limits.',
+      )
     }
     console.error('createManagedUser failed', error)
     throw new HttpError(500, 'user_create_failed', 'Unable to create user')
@@ -302,7 +312,54 @@ export async function updateManagedUser(
   return data
 }
 
-export function publicUser(profile: Record<string, unknown>) {
+export async function resendManagedUserActivation(
+  admin: SupabaseClient,
+  tenantId: string,
+  ref: string,
+  actor: string,
+) {
+  const existing = await findProfile(admin, tenantId, ref)
+  if (!existing) throw new HttpError(404, 'user_not_found', 'User not found')
+
+  const { data: authData, error: authError } = await admin.auth.admin.getUserById(existing.id)
+  if (authError || !authData.user) {
+    throw new HttpError(500, 'auth_lookup_failed', 'Unable to load the user login account')
+  }
+  if (authData.user.email_confirmed_at) {
+    throw new HttpError(409, 'already_activated', 'This user has already confirmed the account')
+  }
+
+  const redirectTo = Deno.env.get('USER_INVITE_REDIRECT_URL')?.trim() || 'https://mobileid-admin.nedapdemo.xyz/activate.html'
+  const { error } = await admin.auth.admin.inviteUserByEmail(existing.email, {
+    data: {
+      first_name: existing.first_name,
+      last_name: existing.last_name,
+      external_id: existing.external_id,
+    },
+    redirectTo,
+  })
+  if (error) {
+    console.error('resend invitation failed', error)
+    throw new HttpError(
+      502,
+      'activation_email_failed',
+      'Unable to send another activation email. For a legacy pre-invite account, recreate the user if Supabase refuses the invitation.',
+    )
+  }
+
+  await logAudit(admin, {
+    tenant_id: tenantId,
+    site_id: existing.site_id,
+    profile_id: existing.id,
+    event_type: 'activation_invite_resent',
+    actor,
+    metadata: { email: existing.email },
+  })
+
+  return existing
+}
+
+export function publicUser(profile: Record<string, unknown>, authUser?: Record<string, unknown> | null) {
   return {
     id: profile.id,
     externalId: profile.external_id,
@@ -315,5 +372,8 @@ export function publicUser(profile: Record<string, unknown>) {
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
     lastCredentialIssuedAt: profile.last_credential_issued_at,
+    accountStatus: authUser ? (authUser.email_confirmed_at ? 'activated' : 'pending_activation') : undefined,
+    emailConfirmedAt: authUser?.email_confirmed_at ?? undefined,
+    lastSignInAt: authUser?.last_sign_in_at ?? undefined,
   }
 }

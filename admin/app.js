@@ -80,10 +80,29 @@ async function loadUsers() {
       <td><code>${escapeHtml(user.identifierNumber ?? '')}</code></td>
       <td>${escapeHtml(user.externalId ?? '')}</td>
       <td><span class="status ${user.active ? 'active' : 'inactive'}">${user.active ? 'Active' : 'Inactive'}</span></td>
-      <td><button class="secondary edit-user" data-id="${user.id}">Edit</button></td>
+      <td><span class="status ${user.accountStatus === 'activated' ? 'active' : 'inactive'}">${user.accountStatus === 'activated' ? 'Activated' : 'Pending activation'}</span></td>
+      <td class="row gap">
+        <button class="secondary edit-user" data-id="${user.id}">Edit</button>
+        ${user.accountStatus === 'pending_activation' ? `<button class="secondary resend-activation" data-id="${user.id}">Resend activation</button>` : ''}
+      </td>
     </tr>
   `).join('')
   document.querySelectorAll('.edit-user').forEach((button) => button.addEventListener('click', () => editUser(button.dataset.id)))
+  document.querySelectorAll('.resend-activation').forEach((button) => button.addEventListener('click', () => resendActivation(button.dataset.id)))
+}
+
+async function resendActivation(id) {
+  const user = users.find((item) => item.id === id)
+  if (!user) return
+  if (!confirm(`Send a new activation email to ${user.email}?`)) return
+  message('userMessage', 'Sending activation email...')
+  try {
+    await callAdmin('resendActivation', { id })
+    message('userMessage', 'Activation email sent.', 'success')
+    await loadUsers()
+  } catch (error) {
+    message('userMessage', error.message, 'error')
+  }
 }
 
 function editUser(id) {
@@ -108,6 +127,7 @@ function resetUserForm() {
   $('userForm').reset()
   $('editingUserId').value = ''
   $('active').checked = true
+  $('sendInvite').checked = true
   $('userFormTitle').textContent = 'Create user'
   $('saveUserButton').textContent = 'Create user'
   $('cancelEdit').classList.add('hidden')

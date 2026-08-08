@@ -1,12 +1,12 @@
 import { createAdminClient } from '../_shared/db.ts'
 import { requirePowerUser } from '../_shared/auth.ts'
 import { errorResponse, HttpError, jsonResponse, readJson } from '../_shared/http.ts'
-import { createManagedUser, publicUser, updateManagedUser } from '../_shared/users.ts'
+import { createManagedUser, publicUser, resendManagedUserActivation, updateManagedUser } from '../_shared/users.ts'
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get('origin') ?? ''
   const defaults = [
-	'https://mobileid-admin.nedapdemo.xyz',
+    'https://mobileid-admin.nedapdemo.xyz',
     'https://admin.mobileid.nedapdemo.xyz',
     'https://arn1986.github.io',
     'http://localhost:5173',
@@ -70,7 +70,15 @@ Deno.serve(async (req) => {
 
       const { data, error } = await query
       if (error) throw new HttpError(500, 'user_list_failed', 'Unable to load users')
-      return jsonResponse({ success: true, users: (data ?? []).map(publicUser) }, 200, cors)
+
+      const { data: authUsers, error: authUsersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+      if (authUsersError) throw new HttpError(500, 'auth_user_list_failed', 'Unable to load account activation status')
+      const authById = new Map(authUsers.users.map((user) => [user.id, user as unknown as Record<string, unknown>]))
+      return jsonResponse(
+        { success: true, users: (data ?? []).map((profile) => publicUser(profile, authById.get(profile.id) ?? null)) },
+        200,
+        cors,
+      )
     }
 
     if (action === 'createUser') {
@@ -94,6 +102,19 @@ Deno.serve(async (req) => {
         body.user,
         actor,
         null,
+      )
+      return jsonResponse({ success: true, user: publicUser(profile) }, 200, cors)
+    }
+
+
+    if (action === 'resendActivation') {
+      const id = String(body.id ?? '')
+      if (!id) throw new HttpError(400, 'validation_error', 'id is required')
+      const profile = await resendManagedUserActivation(
+        admin,
+        adminProfile.tenant_id,
+        id,
+        actor,
       )
       return jsonResponse({ success: true, user: publicUser(profile) }, 200, cors)
     }
